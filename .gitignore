@@ -1,0 +1,16 @@
+.sublimets
+.tscache
+.idea
+*.iml
+*.js
+*.js.map
+!/*.js
+!/site/*.js
+dist
+_build
+node_modules
+bower_components
+tests/typings/dist/
+.baseDir.ts
+html-report
+typings
