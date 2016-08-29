@@ -12,10 +12,14 @@
 	},
 	"filesGlob": [
 		"./typings/index.d.ts",
-		"./site/**/*.ts",
+		"./src/**/*.ts",
 		"./tests/**/*.ts"
 	],
 	"files": [
+		"./typings/index.d.ts",
+		"./src/has.ts",
+		"./src/index.ts",
+		"./src/main.ts",
 		"./tests/functional/all.ts",
 		"./tests/intern-local.ts",
 		"./tests/intern.ts",

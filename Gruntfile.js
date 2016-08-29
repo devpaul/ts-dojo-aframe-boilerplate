@@ -5,11 +5,12 @@ var TASKS = [
 	'grunt-contrib-copy',
 	'grunt-contrib-watch',
 	'grunt-contrib-jshint',
+	'grunt-contrib-symlink',
 	'grunt-jscs',
 	'grunt-text-replace',
 	'grunt-ts',
 	'grunt-tslint',
-	'dts-generator',
+	'grunt-shell',
 	'intern'
 ];
 
@@ -42,16 +43,20 @@ module.exports = function (grunt) {
 		name: packageJson.name,
 		version: packageJson.version,
 		tsconfig: tsconfig,
+		istanbulIgnoreNext: '/* istanbul ignore next */',
 		all: [ '<%= tsconfig.filesGlob %>' ],
 		skipTests: [ '<%= all %>', '!tests/**/*.ts' ],
 		staticTestFiles: 'tests/**/*.{html,css}',
+		srcDirectory: 'src',
+		siteDirectory: '.',
 		devDirectory: '<%= tsconfig.compilerOptions.outDir %>',
-		distDirectory: 'dist',
-		istanbulIgnoreNext: '/* istanbul ignore next */',
+		distDirectory: 'docs',
+		testDirectory: 'test',
+		targetDirectory: '<%= devDirectory %>',
 
 		clean: {
 			dist: {
-				src: [ 'dist/' ]
+				src: [ '<%= distDirectory %>/' ]
 			},
 			dev: {
 				src: [ '<%= devDirectory %>' ]
@@ -74,11 +79,11 @@ module.exports = function (grunt) {
 		},
 
 		copy: {
-			staticFiles: {
+			staticSiteFiles: {
 				expand: true,
 				cwd: '.',
-				src: [ 'site/**/*.html' ],
-				dest: '<%= devDirectory %>'
+				src: [ '<%= siteDirectory %>/*.html' ],
+				dest: '<%= targetDirectory %>'
 			},
 			staticTestFiles: {
 				expand: true,
@@ -90,13 +95,24 @@ module.exports = function (grunt) {
 				expand: true,
 				cwd: '.',
 				src: [ 'README.md', 'LICENSE', 'package.json' ],
-				dest: '<%= distDirectory =>'
+				dest: '<%= distDirectory %>'
 			},
-			typings: {
+			nodeModules: {
 				expand: true,
-				cwd: 'typings/',
-				src: [ '**/*.d.ts', '!tsd.d.ts' ],
-				dest: 'dist/typings/'
+				cwd: '.',
+				src: [ 'node_modules/**/*' ],
+				dest: '<%= distDirectory %>'
+			}
+		},
+
+		shell: {
+			prune: {
+				command: 'npm prune --production',
+				options: {
+					execOptions: {
+						cwd: '<%= distDirectory %>'
+					}
+				}
 			}
 		},
 
@@ -132,15 +148,15 @@ module.exports = function (grunt) {
 		rename: {
 			sourceMaps: {
 				expand: true,
-				cwd: 'dist/',
+				cwd: '<%= distDirectory %>',
 				src: [ '**/*.js.map', '!_debug/**/*.js.map' ],
-				dest: 'dist/_debug/'
+				dest: '<%= distDirectory %>/_debug/'
 			}
 		},
 
 		rewriteSourceMaps: {
 			dist: {
-				src: [ 'dist/_debug/**/*.js.map' ]
+				src: [ '<%= distDirectory %>/_debug/**/*.js.map' ]
 			}
 		},
 
@@ -161,6 +177,13 @@ module.exports = function (grunt) {
 			}
 		},
 
+		symlink: {
+			dev: {
+				src: 'node_modules',
+				dest: '<%= devDirectory %>/node_modules'
+			}
+		},
+
 		ts: {
 			options: mixin(
 				compilerOptions,
@@ -175,9 +198,9 @@ module.exports = function (grunt) {
 			},
 			dist: {
 				options: {
-					mapRoot: '../dist/_debug'
+					mapRoot: '../<%= distDirectory %>/_debug'
 				},
-				outDir: 'dist',
+				outDir: '<%= distDirectory %>/src',
 				src: [ '<%= skipTests %>' ]
 			}
 		},
@@ -196,11 +219,11 @@ module.exports = function (grunt) {
 		},
 
 		jshint: {
-			all: [ 'Gruntfile.js', 'site/**/*.js', 'test/**/*.js' ]
+			all: [ 'Gruntfile.js', '<%= srcDirectory %>/**/*.js', '<%= testDirectory %>/**/*.js' ]
 		},
 
 		jscs: {
-			all: [ 'Gruntfile.js', 'site/**/*.js', 'test/**/*.js' ]
+			all: [ 'Gruntfile.js', '<%= srcDirectory %>/**/*.js', '<%= testDirectory %>/**/*.js' ]
 		},
 
 		watch: {
@@ -271,25 +294,43 @@ module.exports = function (grunt) {
 		}
 	});
 
+	grunt.registerTask('settarget', function (target) {
+		var directory = grunt.config.get('targetDirectory');
+		if (target === 'dist') {
+			directory = grunt.config.get('distDirectory');
+		}
+		console.log('Setting targetDirectory to ' + target + ': ' + directory);
+		grunt.config.set('targetDirectory', directory);
+	});
+
 	grunt.registerTask('build-quick', [
 		'ts:dev',
-		'copy:staticFiles'
+		'copy:staticSiteFiles'
 	]);
 	grunt.registerTask('build', [
 		'ts:dev',
-		'copy:staticFiles',
+		'copy:staticSiteFiles',
 		'copy:staticTestFiles',
+		'symlink:dev',
 		'replace:addIstanbulIgnore',
 		'updateTsconfig'
 	]);
 	grunt.registerTask('dist', [
+		'settarget:dist',
+		'clean:dist',
 		'ts:dist',
 		'rename:sourceMaps',
 		'rewriteSourceMaps',
-		'copy:typings',
-		'copy:staticFiles',
-		'dtsGenerator:dist'
+		'copy:staticSiteFiles',
+		'copy:staticDistFiles',
+
+		/* copy our node modules which we need to bundle */
+		'copy:nodeModules',
+
+		/* prune the npm packages for a production build */
+		'shell:prune'
 	]);
+
 	grunt.registerTask('lint', [ 'jshint', 'jscs', 'tslint' ]);
 	grunt.registerTask('test', [ 'build', 'intern:client' ]);
 	grunt.registerTask('test-local', [ 'build', 'intern:local' ]);
