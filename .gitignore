@@ -6,3 +6,5 @@ _build
 .baseDir.ts
 html-report
 typings
+.grunt
+dist

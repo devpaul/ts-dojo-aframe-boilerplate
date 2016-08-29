@@ -6,6 +6,7 @@ var TASKS = [
 	'grunt-contrib-watch',
 	'grunt-contrib-jshint',
 	'grunt-contrib-symlink',
+	'grunt-gh-pages',
 	'grunt-jscs',
 	'grunt-text-replace',
 	'grunt-ts',
@@ -50,7 +51,7 @@ module.exports = function (grunt) {
 		srcDirectory: 'src',
 		siteDirectory: '.',
 		devDirectory: '<%= tsconfig.compilerOptions.outDir %>',
-		distDirectory: 'docs',
+		distDirectory: 'dist',
 		testDirectory: 'test',
 		targetDirectory: '<%= devDirectory %>',
 
@@ -102,6 +103,17 @@ module.exports = function (grunt) {
 				cwd: '.',
 				src: [ 'node_modules/**/*' ],
 				dest: '<%= distDirectory %>'
+			}
+		},
+
+		'gh-pages': {
+			publish: {
+				options: {
+					base: '<%= distDirectory %>',
+					push: true
+				},
+
+				src: [ '**/*' ]
 			}
 		},
 
@@ -337,5 +349,6 @@ module.exports = function (grunt) {
 	grunt.registerTask('test-proxy', [ 'build', 'intern:proxy' ]);
 	grunt.registerTask('test-runner', [ 'build', 'intern:runner' ]);
 	grunt.registerTask('ci', [ 'clean', 'lint', 'test' ]);
+	grunt.registerTask('publish', [ 'dist', 'gh-pages:publish' ]);
 	grunt.registerTask('default', [ 'clean', 'lint', 'build' ]);
 };
