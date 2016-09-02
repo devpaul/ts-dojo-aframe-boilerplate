@@ -16,6 +16,13 @@ module.exports = function (grunt) {
 	TASKS.forEach(grunt.loadNpmTasks.bind(grunt));
 
 	require('grunt-dojo2').initConfig(grunt, {
+		istanbulIgnoreNext: '/* istanbul ignore next */',
+		staticTestFiles: 'tests/**/*.{html,css}',
+		distDirectory: 'dist',
+		testDirectory: 'test',
+		srcDirectory: 'src',
+		targetDirectory: '<%= devDirectory %>',
+		siteDirectory: '.',
 		copy: {
 			staticSiteFiles: {
 				expand: true,
@@ -43,12 +50,6 @@ module.exports = function (grunt) {
 			}
 		},
 		clean: {
-			dist: {
-				src: [ '<%= distDirectory %>/' ]
-			},
-			dev: {
-				src: [ '<%= devDirectory %>' ]
-			},
 			src: {
 				src: [ '{src,tests}/**/*.js' ],
 				filter: function (path) {
@@ -180,83 +181,61 @@ module.exports = function (grunt) {
 				]
 			}
 		}
-	},
-	{
-		istanbulIgnoreNext: '/* istanbul ignore next */',
-		staticTestFiles: 'tests/**/*.{html,css}',
-		distDirectory: 'dist',
-		testDirectory: 'test',
-		srcDirectory: 'src',
-		targetDirectory: '<%= devDirectory %>',
-		siteDirectory: '.'
 	});
 
-					// Set some Intern-specific options if specified on the command line.
-					[ 'suites', 'functionalSuites', 'grep' ].forEach(function (option) {
-						var value = grunt.option(option);
-						if (value) {
-							if (option !== 'grep') {
-								value = value.split(',').map(function (string) {
-									return string.trim();
-								});
-							}
-							grunt.config('intern.options.' + option, value);
-						}
-					});
+	grunt.registerMultiTask('rename', function () {
+		this.files.forEach(function (file) {
+			if (grunt.file.isFile(file.src[0])) {
+				grunt.file.mkdir(require('path').dirname(file.dest));
+			}
+			require('fs').renameSync(file.src[0], file.dest);
+			grunt.verbose.writeln('Renamed ' + file.src[0] + ' to ' + file.dest);
+		});
+		grunt.log.writeln('Moved ' + this.files.length + ' files');
+	});
 
-					grunt.registerMultiTask('rename', function () {
-						this.files.forEach(function (file) {
-							if (grunt.file.isFile(file.src[0])) {
-								grunt.file.mkdir(require('path').dirname(file.dest));
-							}
-							require('fs').renameSync(file.src[0], file.dest);
-							grunt.verbose.writeln('Renamed ' + file.src[0] + ' to ' + file.dest);
-						});
-						grunt.log.writeln('Moved ' + this.files.length + ' files');
-					});
+	grunt.registerTask('settarget', function (target) {
+		var directory = grunt.config.get('targetDirectory');
+		if (target === 'dist') {
+			directory = grunt.config.get('distDirectory');
+		}
+		console.log('Setting targetDirectory to ' + target + ': ' + directory);
+		grunt.config.set('targetDirectory', directory);
+	});
 
-					grunt.registerTask('settarget', function (target) {
-						var directory = grunt.config.get('targetDirectory');
-						if (target === 'dist') {
-							directory = grunt.config.get('distDirectory');
-						}
-						console.log('Setting targetDirectory to ' + target + ': ' + directory);
-						grunt.config.set('targetDirectory', directory);
-					});
+	grunt.registerTask('build-quick', [
+		'ts:dev',
+		'copy:staticSiteFiles'
+	]);
+	grunt.registerTask('build', [
+		'ts:dev',
+		'copy:staticSiteFiles',
+		'copy:staticTestFiles',
+		'symlink:dev',
+		'replace:addIstanbulIgnore'
+	]);
+	grunt.registerTask('dist', [
+		'settarget:dist',
+		'clean:dist',
+		'ts:dist',
+		'rename:sourceMaps',
+		'rewriteSourceMaps',
+		'copy:staticSiteFiles',
+		'copy:staticDistFiles',
 
-					grunt.registerTask('build-quick', [
-						'ts:dev',
-						'copy:staticSiteFiles'
-					]);
-					grunt.registerTask('build', [
-						'ts:dev',
-						'copy:staticSiteFiles',
-						'copy:staticTestFiles',
-						'symlink:dev',
-						'replace:addIstanbulIgnore'
-					]);
-					grunt.registerTask('dist', [
-						'settarget:dist',
-						'clean:dist',
-						'ts:dist',
-						'rename:sourceMaps',
-						'rewriteSourceMaps',
-						'copy:staticSiteFiles',
-						'copy:staticDistFiles',
+		/* copy our node modules which we need to bundle */
+		'copy:nodeModules',
 
-						/* copy our node modules which we need to bundle */
-						'copy:nodeModules',
+		/* prune the npm packages for a production build */
+		'shell:prune'
+	]);
 
-						/* prune the npm packages for a production build */
-						'shell:prune'
-					]);
-
-					grunt.registerTask('lint', [ 'jshint', 'jscs', 'tslint' ]);
-					grunt.registerTask('test', [ 'build', 'intern:client' ]);
-					grunt.registerTask('test-local', [ 'build', 'intern:local' ]);
-					grunt.registerTask('test-proxy', [ 'build', 'intern:proxy' ]);
-					grunt.registerTask('test-runner', [ 'build', 'intern:runner' ]);
-					grunt.registerTask('ci', [ 'clean', 'lint', 'test' ]);
-					grunt.registerTask('publish', [ 'dist', 'gh-pages:publish' ]);
-					grunt.registerTask('default', [ 'clean', 'lint', 'build' ]);
+	grunt.registerTask('lint', [ 'jshint', 'jscs', 'tslint' ]);
+	grunt.registerTask('test', [ 'build', 'intern:client' ]);
+	grunt.registerTask('test-local', [ 'build', 'intern:local' ]);
+	grunt.registerTask('test-proxy', [ 'build', 'intern:proxy' ]);
+	grunt.registerTask('test-runner', [ 'build', 'intern:runner' ]);
+	grunt.registerTask('ci', [ 'clean', 'lint', 'test' ]);
+	grunt.registerTask('publish', [ 'dist', 'gh-pages:publish' ]);
+	grunt.registerTask('default', [ 'clean', 'lint', 'build' ]);
 };
