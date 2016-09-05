@@ -1,5 +1,5 @@
 (function () {
-    var nodeModules = '../node_modules';
+    var libsDirectory = './libs';
     require.config({
         baseUrl: '.',
         packages: [
@@ -9,20 +9,20 @@
             },
             {
                 name: 'aframe',
-                location: nodeModules + "/aframe/dist",
+                location: libsDirectory + "/aframe",
                 main: 'aframe.min.js'
             },
             {
                 name: 'dojo-core',
-                location: nodeModules + "/dojo-core/dist/umd"
+                location: libsDirectory + "/dojo-core"
             },
             {
                 name: 'dojo-has',
-                location: nodeModules + "/dojo-has/dist/umd"
+                location: libsDirectory + "/dojo-has"
             },
             {
                 name: 'dojo-shim',
-                location: nodeModules + "/dojo-shim/dist/umd"
+                location: libsDirectory + "/dojo-shim"
             }
         ]
     });
