@@ -1,4 +1,5 @@
 /* jshint node:true */
+var fs = require('fs');
 
 var TASKS = [
 	'grunt-contrib-clean',
@@ -14,6 +15,50 @@ var TASKS = [
 	'grunt-shell',
 	'intern'
 ];
+
+var LIBS = [
+	'node_modules/dojo-loader/dist/umd/loader.min.js',
+	'node_modules/dojo-core',
+	'node_modules/dojo-has',
+	'node_modules/dojo-shim',
+	'node_modules/aframe/dist/aframe.min.js'
+];
+
+var LIBINFO = LIBS.map(function (file) {
+	var stats = fs.statSync(file);
+	return {
+		file: file,
+		stats: stats,
+		mainDirectory: /^node_modules\/([^/]*)/.exec(file)[1],
+		libFilename: stats.isDirectory() ? '' : file.substr(file.lastIndexOf('/') + 1)
+	};
+});
+
+function createCopyConfiguration(target) {
+	return LIBINFO.map(function (info) {
+		if (info.stats.isDirectory()) {
+			return {
+				expand: true,
+				cwd: info.file,
+				src: '*',
+				dest: target + info.mainDirectory
+			};
+		}
+		return {
+			src: info.file,
+			dest: target + info.mainDirectory + '/' + info.libFilename
+		};
+	});
+}
+
+function createSymlinkConfiguration(target) {
+	return LIBINFO.map(function (info) {
+		return {
+			src: info.file,
+			dest: target + info.mainDirectory + '/' + info.libFilename
+		};
+	});
+}
 
 function mixin(destination, source) {
 	for (var key in source) {
@@ -116,6 +161,9 @@ module.exports = function (grunt) {
 				cwd: '.',
 				src: [ 'node_modules/**/*' ],
 				dest: '<%= distDirectory %>'
+			},
+			libs: {
+				files: createCopyConfiguration('<%= distDirectory %>/libs/')
 			}
 		},
 
@@ -203,9 +251,8 @@ module.exports = function (grunt) {
 		},
 
 		symlink: {
-			dev: {
-				src: 'node_modules',
-				dest: '<%= devDirectory %>/node_modules'
+			libs: {
+				files: createSymlinkConfiguration('<%= devDirectory %>/libs/')
 			}
 		},
 
@@ -286,23 +333,6 @@ module.exports = function (grunt) {
 	});
 
 	/**
-	 * Rewrite the compiled source maps to accommodate moving it to a new location
-	 */
-	grunt.registerMultiTask('rewriteSourceMaps', function () {
-		this.filesSrc.forEach(function (file) {
-			var map = JSON.parse(grunt.file.read(file));
-			var sourcesContent = map.sourcesContent = [];
-			var path = require('path');
-			map.sources = map.sources.map(function (source, index) {
-				sourcesContent[index] = grunt.file.read(path.resolve(path.dirname(file), source));
-				return source.replace(/^.*\/src\//, '');
-			});
-			grunt.file.write(file, JSON.stringify(map));
-		});
-		grunt.log.writeln('Rewrote ' + this.filesSrc.length + ' source maps');
-	});
-
-	/**
 	 * Rename (move) a collection of files
 	 */
 	grunt.registerMultiTask('rename', function () {
@@ -345,7 +375,7 @@ module.exports = function (grunt) {
 		'ts:dev',
 		'copy:staticSiteFiles',
 		'copy:staticTestFiles',
-		'symlink:dev',
+		'symlink:libs',
 		'replace:addIstanbulIgnore'
 	]);
 
@@ -356,16 +386,9 @@ module.exports = function (grunt) {
 		'settarget:dist',
 		'clean:dist',
 		'ts:dist',
-		'rename:sourceMaps',
-		'rewriteSourceMaps',
 		'copy:staticSiteFiles',
 		'copy:staticDistFiles',
-
-		/* copy our node modules which we need to bundle */
-		'copy:nodeModules',
-
-		/* prune the npm packages for a production build */
-		'shell:prune'
+		'copy:libs'
 	]);
 
 	grunt.registerTask('lint', [ 'jshint', 'jscs', 'tslint' ]);

@@ -1,5 +1,5 @@
 (function () {
-	const nodeModules = '../node_modules';
+	const libsDirectory = './libs';
 
 	(<DojoLoader.RootRequire> require).config({
 		baseUrl: '.',
@@ -10,20 +10,20 @@
 			},
 			{
 				name: 'aframe',
-				location: `${ nodeModules }/aframe/dist`,
+				location: `${ libsDirectory }/aframe`,
 				main: 'aframe.min.js'
 			},
 			{
 				name: 'dojo-core',
-				location: `${ nodeModules }/dojo-core`
+				location: `${ libsDirectory }/dojo-core`
 			},
 			{
 				name: 'dojo-has',
-				location: `${ nodeModules }/dojo-has`
+				location: `${ libsDirectory }/dojo-has`
 			},
 			{
 				name: 'dojo-shim',
-				location: `${ nodeModules }/dojo-shim`
+				location: `${ libsDirectory }/dojo-shim`
 			}
 		]
 	});
