@@ -15,15 +15,15 @@
 			},
 			{
 				name: 'dojo-core',
-				location: `${ nodeModules }/dojo-core/dist/umd`
+				location: `${ nodeModules }/dojo-core`
 			},
 			{
 				name: 'dojo-has',
-				location: `${ nodeModules }/dojo-has/dist/umd`
+				location: `${ nodeModules }/dojo-has`
 			},
 			{
 				name: 'dojo-shim',
-				location: `${ nodeModules }/dojo-shim/dist/umd`
+				location: `${ nodeModules }/dojo-shim`
 			}
 		]
 	});

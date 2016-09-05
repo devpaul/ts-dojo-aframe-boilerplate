@@ -11,7 +11,7 @@
 				"dojo-core/dist/umd/*"
 			],
 			"dojo-has/*": [
-				"dojo-has/dist/umd/*"
+				"dojo-has/*"
 			],
 			"dojo-shim/*": [
 				"dojo-shim/dist/umd/*"
@@ -20,7 +20,7 @@
 		"removeComments": false,
 		"sourceMap": true,
 		"target": "es5",
-		"moduleResolution": "classic"
+		"moduleResolution": "node"
 	},
 	"include": [
 		"./typings/index.d.ts",
