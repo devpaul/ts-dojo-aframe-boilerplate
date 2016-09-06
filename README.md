@@ -31,10 +31,13 @@ See our boilerplate at [https://devpaul.github.io/ts-dojo-aframe-boilerplate](ht
 
 ## TODOs
 
-* Add server + proxy
 * Test/Ensure Vive support
+* Add instructions for obtaining supported Vive browsers (FF nightly and Chrome)
+* Add A-Frame (three.js, etc...) typings
+* Implement a mobile + https development server + proxy solution
 * Improve Gruntfile neatness
-* Improve dist step: add test task, improve vendor'd node_modules (why is there so many still?)
+* Add some unit tests
+* Add functional testing strategy + examples (maybe adapter pattern?)
 
 ## Grunt Commands
 
