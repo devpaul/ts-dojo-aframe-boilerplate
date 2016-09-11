@@ -34,7 +34,12 @@ See our boilerplate at [https://devpaul.github.io/ts-dojo-aframe-boilerplate](ht
 * Test/Ensure Vive support
 * Add instructions for obtaining supported Vive browsers (FF nightly and Chrome)
 * Add A-Frame (three.js, etc...) typings
-* Implement a mobile + https development server + proxy solution
+* Add a quickstart getting start w/ development
+* Implement a mobile + https development server + proxy solution w/ instructions
+	* self-signed certs
+	* ngrok
+	* Lets Encrypt + Proxy
+	* localhost
 * Improve Gruntfile neatness
 * Add some unit tests
 * Add functional testing strategy + examples (maybe adapter pattern?)

@@ -11,6 +11,10 @@
     "type": "git",
     "url": "https://github.com/devpaul/ts-aframe-boilerplate.git"
   },
+  "scripts": {
+    "install": "typings install",
+    "test": "intern-runner config=tests/intern-local"
+  },
   "dependencies": {
     "aframe": "^0.3.1",
     "dojo-core": "^2.0.0-alpha.11",

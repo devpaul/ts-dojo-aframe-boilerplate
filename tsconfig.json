@@ -5,16 +5,16 @@
 		"module": "umd",
 		"noImplicitAny": true,
 		"outDir": "_build/",
-		"baseUrl": "node_modules",
+		"baseUrl": ".",
 		"paths": {
 			"dojo-core/*": [
-				"dojo-core/dist/umd/*"
+				"node_modules/dojo-core/dist/umd/*"
 			],
 			"dojo-has/*": [
-				"dojo-has/*"
+				"node_modules/dojo-has/*"
 			],
 			"dojo-shim/*": [
-				"dojo-shim/dist/umd/*"
+				"node_modules/dojo-shim/dist/umd/*"
 			]
 		},
 		"removeComments": false,
