@@ -11,10 +11,11 @@ It features a complete development environment including
 
 We hope this is a useful starting place to begin your project <3.
 
+[![Build Status](https://travis-ci.org/devpaul/ts-dojo-aframe-boilerplate.svg?branch=master)](https://travis-ci.org/devpaul/ts-dojo-aframe-boilerplate)
+
 ## Quick Start
 
 * `npm install`
-* `typings install`
 * `grunt`
 * launch http://localhost/_build/index.html
 
