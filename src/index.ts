@@ -1,7 +1,8 @@
 (function () {
 	const libsDirectory = './libs';
+	const require: any = (<any> window).require;
 
-	(<DojoLoader.RootRequire> require).config({
+	(<any> require).config({
 		baseUrl: '.',
 		packages: [
 			{

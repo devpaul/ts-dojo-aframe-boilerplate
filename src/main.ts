@@ -7,4 +7,4 @@ console.log(`Gamepad is supported: ${ has('gamepad') }`);
 export default {
 	// TODO Add a reference to your main application object after initialization
 	app: Promise.resolve(null)
-}
+};

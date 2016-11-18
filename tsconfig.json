@@ -22,8 +22,13 @@
 		"target": "es5",
 		"moduleResolution": "node"
 	},
+	"files": [
+		"./node_modules/dojo-typings/custom/symbol-shim/symbol-shim.d.ts",
+		"./node_modules/dojo-typings/custom/intern/intern.d.ts",
+		"./node_modules/dojo-typings/custom/leadfoot/leadfoot.d.ts",
+		"./node_modules/dojo-typings/custom/dojo2/dojo.d.ts"
+	],
 	"include": [
-		"./typings/index.d.ts",
 		"./src/**/*.ts",
 		"./tests/**/*.ts"
 	]
